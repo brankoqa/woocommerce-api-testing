@@ -11,3 +11,9 @@ class CustomersDAO(object):
         rs_db = self.db_utils.execute_select(sql)
         logger.debug(f"Executed DB query for get customer by email: {sql}")
         return rs_db
+
+    def get_all_customers(self):
+        sql = "SELECT * FROM `wp_users` LIMIT 5000;"
+        rs_db = self.db_utils.execute_select(sql)
+        logger.debug(f"Executed DB query for get customer by email: {sql}")
+        return rs_db

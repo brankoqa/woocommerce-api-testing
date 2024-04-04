@@ -26,3 +26,8 @@ def generate_random_email_and_password(domain=None, email_prefix=None) -> dict:
     logger.debug(f"Randomly generated credentials are: {random_credentials}")
 
     return random_credentials
+
+def get_random_entity(entity_list, quantity=1):
+    logger.debug("Getting random eentity started")
+    random_entity = random.sample(entity_list, quantity)
+    return random_entity

@@ -6,6 +6,7 @@ import pytest
 from src.dao.customers_dao import CustomersDAO
 from src.utilities.general_utils import generate_random_email_and_password
 from src.utilities.requests_utils import RequestUtil
+from src.utilities.general_utils import get_random_entity
 
 
 @pytest.mark.tcid29
@@ -61,5 +62,26 @@ def test_create_customer_only_first_name():
     pass
 
 
+
+@pytest.mark.tcid32
 def test_create_customer_existing_email():
-    pass
+    # fetch from database limit 500 customers
+    customers_dao = CustomersDAO()
+    all_customers = customers_dao.get_all_customers()
+    # user random.sample to randomly extract customer from step 1
+    random_user = get_random_entity(all_customers, 1)
+    # get thye email from user from step 2
+    existing_email = random_user[0]["user_email"]
+    # try to create a new customer with that email
+    payload = {"email": existing_email}
+    api = RequestUtil()
+    logger.debug("Starting a REST call!")
+    response = api.post("/customers", payload=payload, expected_status_code=400)
+    response_dict = dict(response.json())
+    logger.debug("REST call ended!")
+    # print saatus code
+    logger.debug(f"Response from API call: {response_dict}")
+    # assert you can't create two users with same email
+    assert response_dict["code"] == "registration-error-email-exists", "'Code' property not correct, should be 'registration-error-email-exists'!"
+    assert response_dict["message"] == "An account is already registered with your email address. <a href=\"#\" class=\"showlogin\">Please log in.</a>", "Error message is not as expected!"
+    assert response_dict["data"]["status"] == 400, "Wrong 'status', should be '400'!"
