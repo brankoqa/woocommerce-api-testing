@@ -1,5 +1,4 @@
 import logging as logger
-from pprint import pprint
 
 import pytest
 
@@ -34,11 +33,15 @@ def test_create_customer_only_email():
     assert id_from_api == id_from_db, f"'id' from API: {id_from_api} call should be equal to the 'id' from database: {id_from_db}"\
                                 f" For user email {random_credentials["email"]}"
     # assert cust_db_info["user_email"]
-    logger.info(f"Test ended: customer created: email {response_dict["email"]}")
+    logger.info("Test ended: customer created: email %s", response_dict["email"])
 
 
 @pytest.mark.tcid30
 def test_create_customer_email_and_password():
+    """_summary_
+    Customer should be created only with 'email'. Here we are passing password and validate that
+    password is not returned in the response.
+    """
     logger.info("Test started: customer only email logger!")
     # create payload
     random_credentials = generate_random_email_and_password()
@@ -54,8 +57,9 @@ def test_create_customer_email_and_password():
     assert response_dict["email"] == random_credentials["email"], "Returned wrong email!"
     assert response_dict["first_name"] == "", "First Name should be empty string!"
     assert response_dict["username"] == random_credentials["email"].split("@")[0], "Username is not correct!"
+    assert "password" not in response_dict.keys(), "Password should not be returned in the response!"
     # verify customer created in the database
-    logger.info(f"Test ended: customer created: email {response_dict["email"]}")
+    logger.info("Test ended: customer created: email is: %s", response_dict["email"])
 
 
 def test_create_customer_only_first_name():
@@ -80,7 +84,7 @@ def test_create_customer_existing_email():
     response_dict = dict(response.json())
     logger.debug("REST call ended!")
     # print saatus code
-    logger.debug(f"Response from API call: {response_dict}")
+    logger.debug("Response from API call: %s", response_dict)
     # assert you can't create two users with same email
     assert response_dict["code"] == "registration-error-email-exists", "'Code' property not correct, should be 'registration-error-email-exists'!"
     assert response_dict["message"] == "An account is already registered with your email address. <a href=\"#\" class=\"showlogin\">Please log in.</a>", "Error message is not as expected!"

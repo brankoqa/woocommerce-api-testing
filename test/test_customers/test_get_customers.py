@@ -1,5 +1,6 @@
-import pytest
 import logging as logger
+import pytest
+
 
 from src.utilities.requests_utils import RequestUtil
 
