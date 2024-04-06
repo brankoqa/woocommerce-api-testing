@@ -3,9 +3,11 @@ import logging as logger
 import pytest
 
 from src.dao.customers_dao import CustomersDAO
-from src.utilities.general_utils import generate_random_email_and_password
+from src.utilities.general_utils import (
+    generate_random_email_and_password,
+    get_random_entity,
+)
 from src.utilities.requests_utils import RequestUtil
-from src.utilities.general_utils import get_random_entity
 
 
 @pytest.mark.tcid29
@@ -17,23 +19,27 @@ def test_create_customer_only_email():
     # make a call
     api = RequestUtil()
     logger.debug("Starting a REST call!")
-    response = api.post("/customers", payload=payload, expected_status_code=201)
+    response = api.post("/customers", payload=payload,
+                        expected_status_code=201)
     response_dict = dict(response.json())
     logger.debug("REST call ended!")
     # verify email - json value
     assert response_dict["email"] == random_credentials["email"]
     assert response_dict["first_name"] == "", "First Name should be empty string!"
-    assert response_dict["username"] == random_credentials["email"].split("@")[0], "Username is not correct!"
+    assert response_dict["username"] == random_credentials["email"].split(
+        "@")[0], "Username is not correct!"
     # verify customer created in the database
     customers_dao = CustomersDAO()
-    cust_db_info = customers_dao.get_customer_by_email(random_credentials["email"])
+    cust_db_info = customers_dao.get_customer_by_email(
+        random_credentials["email"])
     logger.info(cust_db_info)
     id_from_api = response_dict["id"]
     id_from_db = cust_db_info[0]["ID"]
     assert id_from_api == id_from_db, f"'id' from API: {id_from_api} call should be equal to the 'id' from database: {id_from_db}"\
-                                f" For user email {random_credentials["email"]}"
+        f" For user email {random_credentials["email"]}"
     # assert cust_db_info["user_email"]
-    logger.info("Test ended: customer created: email %s", response_dict["email"])
+    logger.info("Test ended: customer created: email %s",
+                response_dict["email"])
 
 
 @pytest.mark.tcid30
@@ -50,21 +56,38 @@ def test_create_customer_email_and_password():
     # make a call
     api = RequestUtil()
     logger.debug("Starting a REST call!")
-    response = api.post("/customers", payload=payload, expected_status_code=201)
+    response = api.post("/customers", payload=payload,
+                        expected_status_code=201)
     response_dict = dict(response.json())
     logger.debug("REST call ended!")
     # verify json values
     assert response_dict["email"] == random_credentials["email"], "Returned wrong email!"
     assert response_dict["first_name"] == "", "First Name should be empty string!"
-    assert response_dict["username"] == random_credentials["email"].split("@")[0], "Username is not correct!"
-    assert "password" not in response_dict.keys(), "Password should not be returned in the response!"
+    assert response_dict["username"] == random_credentials["email"].split(
+        "@")[0], "Username is not correct!"
+    assert "password" not in response_dict.keys(
+    ), "Password should not be returned in the response!"
     # verify customer created in the database
-    logger.info("Test ended: customer created: email is: %s", response_dict["email"])
+    logger.info("Test ended: customer created: email is: %s",
+                response_dict["email"])
 
 
+@pytest.mark.tcid31
 def test_create_customer_only_first_name():
-    pass
-
+    """Verify that email is required field.
+    """
+    first_name = "Test First Name"
+    payload = {"first_name": first_name}
+    api = RequestUtil()
+    response = api.post("/customers", payload=payload,
+                        expected_status_code=400)
+    response_dict = dict(response.json())
+    logger.debug("REST call ended!")
+    # verify json values
+    assert response_dict["code"] == "rest_missing_callback_param", "'Code' response property wrong value. Should be 'rest_missing_callback_param'."
+    assert response_dict["message"] == "Missing parameter(s): email", "'Message' response property wrong value, Should be 'Missing parameter(s): email'."
+    assert response_dict["data"]["status"] == 400, "'data.status' response property wrong value. Should be int'400'."
+    assert response_dict["data"]["params"][0] == "email", "'data.params.list' wrong value. Should be 'email'."
 
 
 @pytest.mark.tcid32
@@ -80,7 +103,8 @@ def test_create_customer_existing_email():
     payload = {"email": existing_email}
     api = RequestUtil()
     logger.debug("Starting a REST call!")
-    response = api.post("/customers", payload=payload, expected_status_code=400)
+    response = api.post("/customers", payload=payload,
+                        expected_status_code=400)
     response_dict = dict(response.json())
     logger.debug("REST call ended!")
     # print saatus code

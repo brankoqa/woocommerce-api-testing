@@ -5,7 +5,7 @@ class CustomerHelper(object):
     def __init__(self):
         pass
 
-    def create_customer(self, email=None, **kwargs):
+    def create_customer_payload(self, email=None, **kwargs):
         if not email:
             email = generate_random_email_and_password()["email"]
         password = "Password1"
